@@ -7,6 +7,7 @@ import africa.semicolon.promiscuous.dto.requests.RegisterUserRequest;
 import africa.semicolon.promiscuous.dto.response.ActivateAccountResponse;
 import africa.semicolon.promiscuous.dto.response.ApiResponse;
 import africa.semicolon.promiscuous.dto.response.RegisterUserResponse;
+import africa.semicolon.promiscuous.exceptions.PromiscuousBaseException;
 import africa.semicolon.promiscuous.models.User;
 import africa.semicolon.promiscuous.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -43,17 +44,22 @@ public class PromiscuousUserService implements UserService{
     }
 
     @Override
-    public ApiResponse<ActivateAccountResponse> activateUserAccount(String token) {
-        if (token.equals(appConfig.getTestToken())){
+    public ApiResponse<?> activateUserAccount(String token) {
+        if(token.equals(appConfig.getTestToken())){
             ApiResponse<?> activateAccountResponse =
-                    ApiResponse.builder().data(new ActivateAccountResponse("Account Activated successfully"))
-                            .data(new ActivateAccountResponse())
+                    ApiResponse
+                            .builder()
+                            .data(new ActivateAccountResponse("Account activation successfully"))
                             .build();
             return activateAccountResponse;
         }
-        return null;
-    }
+        if(validateToken(token)){
+            String email = extractEmailFrom(token);
+            User foundUser = userRepository.readByEmail(email).orElseThrow();
+        }
+        throw new PromiscuousBaseException("Account activation was not successful");
 
+    }
     private EmailNotificationRequest buildEmailRequest(User savedUser) {
         EmailNotificationRequest emailNotificationRequest = new EmailNotificationRequest();
         List<Recipient> recipients = new ArrayList<>();

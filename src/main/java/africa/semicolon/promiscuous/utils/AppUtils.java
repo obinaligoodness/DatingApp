@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +55,7 @@ public static final String WELCOME_MAIL_SUBJECT = "Welcome to promiscuous inc.";
         return verifier.verify(token).getClaim("user")!=null;
     }
     public static String extractEmailFrom(String token){
-        var claim = JWT.decode(token).getClaim("user");
-        return (String)
+        var claim = JWT.decode(token).getClaim("user").asString();
+        return claim;
     }
 }
